@@ -33,7 +33,7 @@ static CGFloat const ISSubCircleMinRadius  = 2.f;
     self.subRadius  = ISMainCircleMaxRadius;
     
     self.imageView = [[UIImageView alloc] init];
-    self.imageView.image = [UIImage imageNamed:@"ISRefresgControlIcon"];
+    self.imageView.image = [UIImage imageNamed:@"ISRefreshControlIcon.png"];
     [self addSubview:self.imageView];
 }
 
