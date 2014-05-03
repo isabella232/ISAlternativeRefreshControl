@@ -2,6 +2,10 @@ a template for creating custom UIRefreshControl.
 
 NOTE: If you would like to use the clone of UIRefreshControl on iOS 5, use [ISRefreshControl](https://github.com/ishkawa/ISRefreshControl).
 
+## Robots and Pencils
+
+This component was selected from the many available refresh controls mainly because it was easiest to abstract from depending directly on UIScrollView. This fork is intended to be used to add pull up/down to refresh Core Plot charts. Since scrolling in Core Plot does not use UIScrollView for scrolling, it was necessary to create a custom refresh control. Extending an existing control was easier than writing one from scratch.
+
 ## Requirements
 
 iOS 4.3 or later
