@@ -72,6 +72,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		3ED7EE1714F14687B3FCC998 /* ISScrollable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ISScrollable.h; sourceTree = "<group>"; };
 		7F2814331754D2D400C72D19 /* libISAlternativeRefreshControl.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libISAlternativeRefreshControl.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		7F2814361754D2D400C72D19 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		7F28143A1754D2D400C72D19 /* ISAlternativeRefreshControl-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ISAlternativeRefreshControl-Prefix.pch"; sourceTree = "<group>"; };
@@ -191,6 +192,7 @@
 				7F28143B1754D2D400C72D19 /* ISAlternativeRefreshControl.h */,
 				7F28143D1754D2D400C72D19 /* ISAlternativeRefreshControl.m */,
 				7F2814391754D2D400C72D19 /* Supporting Files */,
+				3ED7EE1714F14687B3FCC998 /* ISScrollable.h */,
 			);
 			path = ISAlternativeRefreshControl;
 			sourceTree = "<group>";

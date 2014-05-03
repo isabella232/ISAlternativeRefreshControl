@@ -1,4 +1,5 @@
 #import "ISAlternativeRefreshControl.h"
+#import "ISScrollable.h"
 
 @interface ISAlternativeRefreshControl ()
 
@@ -35,19 +36,27 @@
     return self.refreshingState == ISRefreshingStateRefreshing;
 }
 
+- (void)setScrollTarget:(id<ISScrollable>)scrollTarget {
+    [(id)self.scrollTarget removeObserver:self forKeyPath:@"contentOffset"];
+
+    _scrollTarget = scrollTarget;
+
+    [(id)self.scrollTarget addObserver:self forKeyPath:@"contentOffset" options:0 context:NULL];
+}
+
 #pragma mark - UIView events
 
 - (void)willMoveToSuperview:(UIView *)newSuperview
 {
     if ([self.superview isKindOfClass:[UIScrollView class]]) {
-        [self.superview removeObserver:self forKeyPath:@"contentOffset"];
+        self.scrollTarget = nil;
     }
 }
 
 - (void)didMoveToSuperview
 {
     if ([self.superview isKindOfClass:[UIScrollView class]]) {
-        [self.superview addObserver:self forKeyPath:@"contentOffset" options:0 context:NULL];
+        self.scrollTarget = (id)self.superview;
     }
 }
 
@@ -55,7 +64,7 @@
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-    if (object == self.superview && [keyPath isEqualToString:@"contentOffset"]) {
+    if (object == self.scrollTarget && [keyPath isEqualToString:@"contentOffset"]) {
         [self.superview bringSubviewToFront:self];
         [self keepOnTop];
         [self updateRefreshingState];
@@ -69,11 +78,11 @@
 
 - (void)keepOnTop
 {
-    if (![self.superview isKindOfClass:[UIScrollView class]]) {
+    if (!self.scrollTarget || !self.stayOnTop) {
         return;
     }
-    
-    CGFloat offset = [(UIScrollView *)self.superview contentOffset].y;
+
+    CGFloat offset = self.scrollTarget.contentOffset.y;
     if (offset < -self.frame.size.height) {
         self.frame = CGRectMake(0.f, offset, self.frame.size.width, self.frame.size.height);
     } else {
@@ -83,11 +92,11 @@
 
 - (void)updateProgress
 {
-    if (![self.superview isKindOfClass:[UIScrollView class]]) {
+    if (!self.scrollTarget) {
         return;
     }
     
-    CGFloat progress = [(UIScrollView *)self.superview contentOffset].y / self.threshold;
+    CGFloat progress = self.scrollTarget.contentOffset.y / self.threshold;
     [self willChangeProgress:progress];
     [self setProgress:progress];
     [self didChangeProgress];
@@ -95,17 +104,16 @@
 
 - (void)updateRefreshingState
 {
-    if (![self.superview isKindOfClass:[UIScrollView class]]) {
+    if (!self.scrollTarget) {
         return;
     }
-    
-    UIScrollView *scrollView = (UIScrollView *)self.superview;
-    CGFloat offset = [scrollView contentOffset].y;
+
+    CGFloat offset = self.scrollTarget.contentOffset.y;
     
     switch (self.refreshingState) {
         case ISRefreshingStateNormal:
             if (self.firesOnRelease) {
-                if (scrollView.isTracking) {
+                if (self.scrollTarget.isTracking) {
                     self.didOverThreshold = offset < self.threshold;
                 } else {
                     if (self.didOverThreshold) {
@@ -123,7 +131,7 @@
             break;
             
         case ISRefreshingStateRefreshed:
-            if (offset >= 0.f && !scrollView.isTracking) {
+            if (offset >= 0.f && !self.scrollTarget.isTracking) {
                 [self resetRefreshingState];
             }
             break;
@@ -137,20 +145,19 @@
 // ISRefreshingStateNormal -> ISRefreshingStateRefreshing,
 - (void)beginRefreshing
 {
-    if (self.isRefreshing) {
+    if (!self.scrollTarget) {
         return;
     }
 
     [self willChangeRefreshingState:ISRefreshingStateRefreshing];
     self.refreshingState = ISRefreshingStateRefreshing;
     
-    UIScrollView *scrollView = (id)self.superview;
-    UIEdgeInsets inset = scrollView.contentInset;
+    UIEdgeInsets inset = self.scrollTarget.contentInset;
     inset.top += self.frame.size.height;
     
     [UIView animateWithDuration:.3f
                      animations:^{
-                         scrollView.contentInset = inset;
+                         self.scrollTarget.contentInset = inset;
                      }
                      completion:^(BOOL finished) {
                          [self didChangeRefreshingState];
@@ -160,20 +167,19 @@
 // ISRefreshingStateRefreshing -> ISRefreshingStateRefreshed,
 - (void)endRefreshing
 {
-    if (!self.isRefreshing) {
+    if (!self.scrollTarget) {
         return;
     }
     
     [self willChangeRefreshingState:ISRefreshingStateRefreshed];
     
-    UIScrollView *scrollView = (id)self.superview;
-    CGFloat offset = scrollView.contentOffset.y;
-    UIEdgeInsets inset = scrollView.contentInset;
+    CGFloat offset = self.scrollTarget.contentOffset.y;
+    UIEdgeInsets inset = self.scrollTarget.contentInset;
     inset.top -= self.frame.size.height;
     
     [UIView animateWithDuration:.3f
                      animations:^{
-                         scrollView.contentInset = inset;
+                         self.scrollTarget.contentInset = inset;
                      }
                      completion:^(BOOL finished) {
                          self.refreshingState = ISRefreshingStateRefreshed;
